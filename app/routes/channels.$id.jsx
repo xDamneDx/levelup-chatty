@@ -1,8 +1,16 @@
 import { useLoaderData } from "@remix-run/react";
-import channels from "~/data/channels.json";
+import supabase from "~/utils/supabase";
 
-export const loader = ({ params: { id } }) => {
-  const channel = channels.find((channel) => channel.id === id);
+export const loader = async ({ params: { id } }) => {
+  const { data: channel, error } = await supabase
+    .from("channels")
+    .select("*, messages(id, content)")
+    .match({ id })
+    .single();
+
+  if (error) {
+    console.error(error);
+  }
 
   return { channel };
 };
