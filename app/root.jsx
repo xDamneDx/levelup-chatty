@@ -7,13 +7,25 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
 
 export const links = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
 ];
 
+export const loader = () => {
+  return {
+    env: {
+      SUPABASE_URL: process.env.SUPABASE_URL,
+      SUPABASE_KEY: process.env.SUPABASE_KEY,
+    },
+  };
+};
+
 export default function App() {
+  const { env } = useLoaderData();
+
   return (
     <html lang="en">
       <head>
@@ -25,6 +37,11 @@ export default function App() {
       <body>
         <Outlet />
         <ScrollRestoration />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.env = ${JSON.stringify(env)}`,
+          }}
+        />
         <Scripts />
         <LiveReload />
       </body>
