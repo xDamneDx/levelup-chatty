@@ -1,4 +1,5 @@
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useFetcher, useLoaderData } from "@remix-run/react";
+import { useEffect, useState } from "react";
 import supabase from "~/utils/supabase";
 
 export const loader = async ({ params: { id } }) => {
@@ -31,11 +32,41 @@ export const action = async ({ request, params: { id: channel_id } }) => {
 };
 
 export default function ChannelRoute() {
+  const fetcher = useFetcher();
   const { channel } = useLoaderData();
+  const [messages, setMessages] = useState([...channel.messages]);
+
+  useEffect(() => {
+    supabase
+      .channel(`messages-${channel.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "messages",
+          filter: `channel_id=eq.${channel.id}`,
+        },
+        () => {
+          fetcher.load(`/channels/${channel.id}`);
+        }
+      )
+      .subscribe();
+  }, []);
+
+  useEffect(() => {
+    if (fetcher.data) {
+      setMessages([...fetcher.data.channel.messages]);
+    }
+  }, [fetcher.data]);
+
+  useEffect(() => {
+    setMessages([...channel.messages]);
+  }, [channel]);
 
   return (
     <div>
-      <pre>{JSON.stringify(channel, null, 2)}</pre>
+      <pre>{JSON.stringify(messages, null, 2)}</pre>
       <Form method="post">
         <input type="text" name="content" />
         <button>Send!</button>
