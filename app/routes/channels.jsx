@@ -17,13 +17,20 @@ export default function ChannelsLayoutRoute() {
   const { channels } = useLoaderData();
 
   return (
-    <div>
-      {channels.map((channel) => (
-        <p key={channel.id}>
-          <Link to={`${channel.id}`}>{channel.title}</Link>
-        </p>
-      ))}
-      <Outlet />
+    <div className="flex h-screen">
+      <div className="w-40 p-8 text-white bg-gray-800">
+        {channels.map((channel) => (
+          <p key={channel.id}>
+            <Link to={`${channel.id}`}>
+              <span className="mr-1 text-gray-400">#</span>
+              {channel.title}
+            </Link>
+          </p>
+        ))}
+      </div>
+      <div className="flex flex-col flex-1 p-8">
+        <Outlet />
+      </div>
     </div>
   );
 }
