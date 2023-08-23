@@ -1,4 +1,5 @@
 import { Link, Outlet, useLoaderData } from "@remix-run/react";
+import { useEffect, useState } from "react";
 import supabase from "~/utils/supabase";
 
 export const loader = async () => {
@@ -14,7 +15,20 @@ export const loader = async () => {
 };
 
 export default function ChannelsLayoutRoute() {
+  const [user, setUser] = useState(null);
   const { channels } = useLoaderData();
+
+  const getUser = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    setUser(user);
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
 
   return (
     <div className="flex h-screen">
