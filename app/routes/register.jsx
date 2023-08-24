@@ -1,7 +1,8 @@
-import { Form, Link } from "@remix-run/react";
-import supabase from "~/utils/supabase";
+import { Form, Link, useOutletContext } from "@remix-run/react";
 
 export default function RegisterRoute() {
+  const { supabase } = useOutletContext();
+
   const handleRegister = async (e) => {
     e.preventDefault();
 

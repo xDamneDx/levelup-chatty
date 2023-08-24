@@ -1,8 +1,22 @@
-import { Link, Outlet, useLoaderData } from "@remix-run/react";
-import { useEffect, useState } from "react";
-import supabase from "~/utils/supabase";
+import {
+  Link,
+  Outlet,
+  useLoaderData,
+  useOutletContext,
+} from "@remix-run/react";
+import { createServerClient } from "@supabase/auth-helpers-remix";
 
-export const loader = async () => {
+export const loader = async ({ request }) => {
+  const response = new Response();
+  const supabase = createServerClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_KEY,
+    {
+      request,
+      response,
+    }
+  );
+
   const { data: channels, error } = await supabase
     .from("channels")
     .select("id, title");
@@ -15,20 +29,8 @@ export const loader = async () => {
 };
 
 export default function ChannelsLayoutRoute() {
-  const [user, setUser] = useState(null);
+  const { supabase } = useOutletContext();
   const { channels } = useLoaderData();
-
-  const getUser = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    setUser(user);
-  };
-
-  useEffect(() => {
-    getUser();
-  }, []);
 
   return (
     <div className="flex h-screen">
@@ -43,7 +45,7 @@ export default function ChannelsLayoutRoute() {
         ))}
       </div>
       <div className="flex flex-col flex-1 p-8">
-        <Outlet />
+        <Outlet context={{ supabase }} />
       </div>
     </div>
   );

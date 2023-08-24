@@ -1,7 +1,9 @@
-import { Form, Link } from "@remix-run/react";
-import supabase from "~/utils/supabase";
+import { Form, Link, useNavigate, useOutletContext } from "@remix-run/react";
 
 export default function LoginRoute() {
+  const { supabase } = useOutletContext();
+  const navigate = useNavigate();
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -12,7 +14,10 @@ export default function LoginRoute() {
       email,
       password,
     });
-    console.log({ data, error });
+
+    if (data) {
+      navigate("/channels");
+    }
   };
 
   return (

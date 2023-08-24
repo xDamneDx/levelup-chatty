@@ -1,8 +1,23 @@
-import { Form, useFetcher, useLoaderData } from "@remix-run/react";
+import {
+  Form,
+  useFetcher,
+  useLoaderData,
+  useOutletContext,
+} from "@remix-run/react";
+import { createServerClient } from "@supabase/auth-helpers-remix";
 import { useEffect, useState } from "react";
-import supabase from "~/utils/supabase";
 
-export const loader = async ({ params: { id } }) => {
+export const loader = async ({ request, params: { id } }) => {
+  const response = new Response();
+  const supabase = createServerClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_KEY,
+    {
+      request,
+      response,
+    }
+  );
+
   const { data: channel, error } = await supabase
     .from("channels")
     .select("id, title, description, messages(id, content)")
@@ -17,6 +32,16 @@ export const loader = async ({ params: { id } }) => {
 };
 
 export const action = async ({ request, params: { id: channel_id } }) => {
+  const response = new Response();
+  const supabase = createServerClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_KEY,
+    {
+      request,
+      response,
+    }
+  );
+
   const formData = await request.formData();
   const content = formData.get("content");
 
@@ -32,6 +57,8 @@ export const action = async ({ request, params: { id: channel_id } }) => {
 };
 
 export default function ChannelRoute() {
+  const { supabase } = useOutletContext();
+
   const fetcher = useFetcher();
   const { channel } = useLoaderData();
   const [messages, setMessages] = useState([...channel.messages]);

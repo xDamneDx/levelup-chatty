@@ -1,9 +1,19 @@
+import { redirect } from "@remix-run/node";
+import { useNavigate, useOutletContext } from "@remix-run/react";
 import { useEffect } from "react";
-import supabase from "~/utils/supabase";
 
 export default function LogoutRoute() {
+  const { supabase } = useOutletContext();
+  const navigate = useNavigate();
+
   useEffect(() => {
-    supabase.auth.signOut();
+    const logout = async () => {
+      await supabase.auth.signOut();
+
+      navigate("/login");
+    };
+
+    logout();
   }, []);
 
   return <p>Logging out...</p>;
