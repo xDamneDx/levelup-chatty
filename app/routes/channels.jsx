@@ -4,18 +4,10 @@ import {
   useLoaderData,
   useOutletContext,
 } from "@remix-run/react";
-import { createServerClient } from "@supabase/auth-helpers-remix";
+import { requireAuth } from "../utils/auth.server";
 
 export const loader = async ({ request }) => {
-  const response = new Response();
-  const supabase = createServerClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_KEY,
-    {
-      request,
-      response,
-    }
-  );
+  const { supabase } = await requireAuth(request);
 
   const { data: channels, error } = await supabase
     .from("channels")

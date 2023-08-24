@@ -15,7 +15,7 @@ export default function LoginRoute() {
       password,
     });
 
-    if (data) {
+    if (!error) {
       navigate("/channels");
     }
   };

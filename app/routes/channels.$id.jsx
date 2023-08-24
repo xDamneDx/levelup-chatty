@@ -6,17 +6,10 @@ import {
 } from "@remix-run/react";
 import { createServerClient } from "@supabase/auth-helpers-remix";
 import { useEffect, useState } from "react";
+import { requireAuth } from "../utils/auth.server";
 
 export const loader = async ({ request, params: { id } }) => {
-  const response = new Response();
-  const supabase = createServerClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_KEY,
-    {
-      request,
-      response,
-    }
-  );
+  const { supabase } = await requireAuth(request);
 
   const { data: channel, error } = await supabase
     .from("channels")
