@@ -13,7 +13,7 @@ export const loader = async ({ request, params: { id } }) => {
   const { data: channel, error } = await supabase
     .from("channels")
     .select(
-      "id, title, description, messages(id, content, profiles(email, username))"
+      "id, title, description, messages(id, content, likes, profiles(email, username))"
     )
     .match({ id })
     .single();
@@ -52,6 +52,13 @@ export default function ChannelRoute() {
   const fetcher = useFetcher();
   const { channel } = useLoaderData();
   const [messages, setMessages] = useState([...channel.messages]);
+
+  const handleIncrement = async (message_id) => {
+    // call increment function from postgres!
+    await supabase.rpc("increment_likes", {
+      message_id,
+    });
+  };
 
   useEffect(() => {
     supabase
@@ -94,6 +101,10 @@ export default function ChannelRoute() {
               {message.content}
               <span className="block px-2 text-xs text-gray-500">
                 {message.profiles.username ?? message.profiles.email}
+              </span>
+              <span className="block px-2 text-xs text-gray-500">
+                {message.likes} likes{" "}
+                <button onClick={() => handleIncrement(message.id)}>👍🏻</button>
               </span>
             </p>
           ))}
