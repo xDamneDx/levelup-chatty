@@ -4,7 +4,6 @@ import {
   useLoaderData,
   useOutletContext,
 } from "@remix-run/react";
-import { createServerClient } from "@supabase/auth-helpers-remix";
 import { useEffect, useState } from "react";
 import { requireAuth } from "../utils/auth.server";
 
@@ -13,7 +12,9 @@ export const loader = async ({ request, params: { id } }) => {
 
   const { data: channel, error } = await supabase
     .from("channels")
-    .select("id, title, description, messages(id, content)")
+    .select(
+      "id, title, description, messages(id, content, profiles(email, username))"
+    )
     .match({ id })
     .single();
 
@@ -25,22 +26,18 @@ export const loader = async ({ request, params: { id } }) => {
 };
 
 export const action = async ({ request, params: { id: channel_id } }) => {
-  const response = new Response();
-  const supabase = createServerClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_KEY,
-    {
-      request,
-      response,
-    }
-  );
+  const { supabase } = await requireAuth(request);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const formData = await request.formData();
   const content = formData.get("content");
 
   const { error } = await supabase
     .from("messages")
-    .insert({ content, channel_id });
+    .insert({ content, channel_id, user_id: user.id });
 
   if (error) {
     console.error(error.message);
@@ -95,6 +92,9 @@ export default function ChannelRoute() {
           {messages.map((message) => (
             <p key={message.id} className="p-2">
               {message.content}
+              <span className="block px-2 text-xs text-gray-500">
+                {message.profiles.username ?? message.profiles.email}
+              </span>
             </p>
           ))}
         </div>
