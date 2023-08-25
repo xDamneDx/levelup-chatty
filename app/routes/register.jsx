@@ -9,11 +9,14 @@ export default function RegisterRoute() {
     const formData = new FormData(e.target);
     const { email, password } = Object.fromEntries(formData);
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
     });
-    console.log({ data, error });
+
+    if (error) {
+      console.error(error.message);
+    }
   };
 
   return (

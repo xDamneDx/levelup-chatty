@@ -2,6 +2,7 @@ import {
   Link,
   Outlet,
   useLoaderData,
+  useLocation,
   useOutletContext,
 } from "@remix-run/react";
 import { requireAuth } from "../utils/auth.server";
@@ -23,6 +24,7 @@ export const loader = async ({ request }) => {
 export default function ChannelsLayoutRoute() {
   const { supabase } = useOutletContext();
   const { channels } = useLoaderData();
+  const location = useLocation();
 
   return (
     <div className="flex h-screen">
@@ -37,6 +39,12 @@ export default function ChannelsLayoutRoute() {
         ))}
       </div>
       <div className="flex flex-col flex-1 p-8">
+        {location.pathname === "/channels" ||
+        location.pathname === "/channels/" ? (
+          <div className="flex items-center justify-center flex-1 text-center">
+            Choose a channel!
+          </div>
+        ) : null}
         <Outlet context={{ supabase }} />
       </div>
     </div>
